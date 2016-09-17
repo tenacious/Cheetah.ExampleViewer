@@ -14,20 +14,20 @@ Your new example code class will be available in drop-down list.
 
 To add parameter to your example , put **DisplayName** attribute to related class property, in this way :
 
-´´´
+```C#
 
 [DisplayName("Arc Radius Value")]
 public double ArcRadiusValue { get; set; }
 
-´´´
+```
 or 
         
-´´´
+```C#
 
 [DisplayName("Equal Segment Constrain Active")]
 public bool IsEqualSegmentActive { get; set; }
 
-´´´
+```
 
 Take a look at [this](https://github.com/tenacious/Cheetah.ExampleViewer/blob/master/Cheetah.ExampleViewer/Examples/FourLinesWithConstrain.cs) and [this](https://github.com/tenacious/Cheetah.ExampleViewer/blob/master/Cheetah.ExampleViewer/Examples/RoundedRectangle.cs) code files, for reference.
 ____
