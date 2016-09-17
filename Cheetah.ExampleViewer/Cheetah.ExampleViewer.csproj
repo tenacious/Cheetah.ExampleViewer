@@ -146,7 +146,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Examples\FourLinesWithConstrain.cs" />
-    <Compile Include="Examples\ICheetahExample.cs" />
+    <Compile Include="Examples\IExampleCode.cs" />
     <Compile Include="Examples\RoundedRectangle.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>

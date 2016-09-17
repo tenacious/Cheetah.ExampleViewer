@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Cheetah.ExampleViewer
 {
-    public class RoundedRectangle : ICheetahExample
+    public class RoundedRectangle : IExampleCode
     {
         CheetahLine2D line1;
         CheetahLine2D line2;

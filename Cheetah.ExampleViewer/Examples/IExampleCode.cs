@@ -10,7 +10,7 @@ namespace Cheetah.ExampleViewer
     /// <summary>
     /// Interface for every example class
     /// </summary>
-    public interface ICheetahExample
+    public interface IExampleCode
     {
         void Reset();
 
@@ -25,18 +25,6 @@ namespace Cheetah.ExampleViewer
     /// </summary>
     public static class Helper
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        //public static void UpdateGeometryCoordinate(List<CheetahCurve> oldCurveCollection, ICollection<CheetahCurve> resultGeometry)
-        //{
-        //    if (!resultGeometry.Any()) return;
-
-        //    for (var i = 0; i < oldCurveCollection.Count; i++)
-        //        oldCurveCollection[i] = resultGeometry.Single(x => x.Id == oldCurveCollection[i].Id);
-        //}
-
-
         public static void GetUpdated<TRet>(ref TRet oldCurve, ICollection<CheetahCurve> resultGeometry) where TRet : CheetahCurve
         {
             var oldId = oldCurve.Id;

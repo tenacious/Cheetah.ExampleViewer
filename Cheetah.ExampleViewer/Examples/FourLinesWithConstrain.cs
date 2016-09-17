@@ -16,7 +16,7 @@ namespace Cheetah.ExampleViewer
     //based on : https://github.com/CloudInvent/Cheetah.Examples/blob/master/Cheetah.Solver.API.Examples/Example1.FourLinesWithConstraints/Program1.cs
 
     [DisplayName("Four Lines With Constrain")]
-    public class FourLinesWithConstrain : ICheetahExample
+    public class FourLinesWithConstrain : IExampleCode
     {
         CheetahLine2D line1;
         CheetahLine2D line2;

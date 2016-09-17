@@ -28,7 +28,7 @@ namespace Cheetah.ExampleViewer
 
         Type _typeSelected;
 
-        ICheetahExample _currentExample;
+        IExampleCode _currentExample;
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
@@ -36,8 +36,8 @@ namespace Cheetah.ExampleViewer
             // These class need to implement "ICheetahExample" 
             _availableExample = Assembly.GetExecutingAssembly()
                                          .GetTypes()
-                                         .Where(t => typeof(ICheetahExample).IsAssignableFrom(t) &&
-                                         t != typeof(ICheetahExample))
+                                         .Where(t => typeof(IExampleCode).IsAssignableFrom(t) &&
+                                         t != typeof(IExampleCode))
                                          .OrderBy(t => t.Name)
                                          .ToList();
 
@@ -280,7 +280,7 @@ namespace Cheetah.ExampleViewer
 
         private void ResetBtnClik(object sender, RoutedEventArgs e)
         {
-            _currentExample = Activator.CreateInstance(_typeSelected) as ICheetahExample;
+            _currentExample = Activator.CreateInstance(_typeSelected) as IExampleCode;
 
             if (_currentExample == null) return;
 
