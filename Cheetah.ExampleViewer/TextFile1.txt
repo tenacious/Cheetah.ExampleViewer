@@ -1,0 +1,353 @@
+﻿namespace DDE_Benchmark
+{
+    /*  TODO 
+    FOLDER RESULT SU DESKTOP
+    PROVA ECCEZZIONE LANCIATA DI PROPOSITO
+    */
+    public partial class MainForm : Form
+    {
+        TextBoxTraceListener _textBoxListener;
+
+        public MainForm()
+        {
+            InitializeComponent();
+
+            Load += MainForm_Load;
+            FormClosing += MainForm_FormClosing;
+
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (Trace.Listeners.Contains(_textBoxListener))
+                Trace.Listeners.Remove(_textBoxListener);
+        }
+
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+
+            #region Setting RESULT FOLDER and Start TRACE to log file 
+
+            // C R E A T E    R E S U L T   D I R E C T O R Y     
+            //
+            // Search a valid name for benchmark result folder and create it.
+            // Don't delete current directory , if existent , because i can have opened file and get some exception.
+
+            var log_folder = "BenchmarkResult";
+
+            var currentLogFolder = log_folder;
+
+            var i = 1;
+            while (Directory.Exists(currentLogFolder))
+                currentLogFolder = log_folder + i++;
+
+            Directory.CreateDirectory(currentLogFolder);
+
+            //
+            // Attach Trace to log file
+
+            var log = new TextWriterTraceListener(File.Create(currentLogFolder + Path.DirectorySeparatorChar + "log.txt"))
+            {
+                Filter = new EventTypeFilter(SourceLevels.Information),
+                TraceOutputOptions = TraceOptions.None,
+            };
+
+            Trace.Listeners.Add(log);
+
+            _textBoxListener = new TextBoxTraceListener(traceConsole);
+
+            Trace.Listeners.Add(_textBoxListener);
+
+            //  Trace.Listeners.Add(new ConsoleTraceListener());
+
+            Trace.AutoFlush = true;
+
+
+            #endregion
+
+            #region DUMP dxDiag to TEXT FILE
+
+            //
+            // D X D I A L O G      D U M P 
+
+            Trace.WriteLine("Calling dxdiag, wait a bit ..");
+
+            var dxdiag_output_file = currentLogFolder + Path.DirectorySeparatorChar + "dxDiag_output.txt";
+
+            var dxDiagProc = Process.Start("dxdiag", "/t " + dxdiag_output_file);
+
+            dxDiagProc.WaitForExit();
+
+            Trace.WriteLine("dxDiag information saved at " + dxdiag_output_file);
+
+            #endregion
+
+
+            Trace.WriteLine("Start testing eyeshot");
+            Trace.WriteLine("Don't press anything , now the application open and close several window, with different configuration. ");
+
+            var et = new EyeshotTester();
+
+            et.StartEyeshotTest(this, currentLogFolder);
+
+
+        }
+
+
+    }
+
+    internal class EyeshotTester
+    {
+        private string eyeshotLicense;
+
+
+        /// <summary>
+        /// Ctor
+        /// </summary>
+        public EyeshotTester()
+        {
+            //
+            // I keep the license key into external txt file, so i don't publish it on GitHub
+            eyeshotLicense = string.Empty;
+
+            if (File.Exists("license.txt"))
+                eyeshotLicense = File.ReadLines("license.txt").FirstOrDefault();
+        }
+
+        private List<Type> eyeshotConfigurationTests;
+
+        private Form _currentForm;
+        private Form _mainForm;
+        private Timer _timer;
+        private RandomColor randColor = new RandomColor();
+
+        private string _folder;
+
+
+        internal void StartEyeshotTest(Form mainForm, string currentFolder)
+        {
+            _folder = currentFolder;
+
+            _mainForm = mainForm;
+
+            /// 
+            /// Collect al the [Form] class type in this assembly
+            eyeshotConfigurationTests = Assembly.GetExecutingAssembly()
+                                            .GetTypes()
+                                            .Where(t => typeof(Form).IsAssignableFrom(t) &&
+                                            t != typeof(Form) &&
+                                            t != typeof(MainForm))
+                                            .OrderBy(t => t.Name)
+                                            .ToList();
+
+            // I start each viewport and i'll wait n second , simulating an usual application
+
+            Trace.WriteLine("  - - - - W A I T - - - - - ");
+
+            RunNext_Form_Configuration(null, null);
+        }
+
+
+        private void RunNext_Form_Configuration(object sender, EventArgs e)
+        {
+            // Init the timer, it call this method each n seconds.
+            if (_timer == null)
+            {
+                _timer = new Timer();
+                _timer.Interval = 4000;
+                _timer.Tick += RunNext_Form_Configuration;
+                _timer.Start();
+            }
+
+            if (_currentForm != null)
+            {
+                var vp = _currentForm.Controls.OfType<ViewportLayout>().FirstOrDefault();
+
+                WriteViewportConfiguration(vp);
+
+                _currentForm.Close();
+
+                Trace.WriteLine("End testing " + _currentForm.GetType().Name);
+                Trace.WriteLine(Separator);
+
+                _currentForm = null;
+            }
+
+
+            var currentFormType = eyeshotConfigurationTests.FirstOrDefault();
+
+
+            if (currentFormType == null)
+            {
+                Trace.WriteLine("Testing completed !");
+
+                MessageBox.Show("Send test ouput is in " + _folder);
+
+                _timer.Stop();
+                _mainForm.Close();
+
+            };
+
+            try
+            {
+                eyeshotConfigurationTests.Remove(currentFormType);
+
+                var configName = currentFormType.Name;
+
+                Trace.WriteLine(Separator);
+                Trace.WriteLine("Start testing : " + configName);
+
+                _currentForm = Activator.CreateInstance(currentFormType) as Form;
+
+                if (_currentForm == null) return;
+
+                _currentForm.Width = 640;
+                _currentForm.Height = 480;
+                _currentForm.Text = configName;
+
+                _currentForm.StartPosition = FormStartPosition.CenterScreen;
+
+                var vp = _currentForm.Controls.OfType<ViewportLayout>().FirstOrDefault();
+
+                if (vp == null)
+                {
+                    Trace.TraceError("Viewport not finded in this form !");
+                    return;
+                }
+
+                if (!string.IsNullOrWhiteSpace(eyeshotLicense))
+                    vp.Unlock(eyeshotLicense);
+
+                _currentForm.Show();
+
+                AddDummyEntities(vp, randColor);
+
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(Separator);
+                Trace.WriteLine(" !!! Failed - exception message :" + ex.ToString());
+                Trace.WriteLine(Separator);
+            }
+        }
+
+        private static void AddDummyEntities(ViewportLayout vp, RandomColor randColor)
+        {
+            var cube = devDept.Eyeshot.Entities.Solid.CreateBox(150, 150, 150);
+            cube.Color = randColor.NextColor();
+            cube.ColorMethod = devDept.Eyeshot.Entities.colorMethodType.byEntity;
+
+            vp.Entities.Add(cube);
+
+            vp.Entities.Regen();
+
+            vp.Invalidate();
+        }
+
+        private class RandomColor
+        {
+            Type colorType = typeof(Color);
+            PropertyInfo[] proInfos;
+            Random rand = new Random();
+
+            public RandomColor()
+            {
+                proInfos = colorType.GetProperties(BindingFlags.Static | BindingFlags.Public);
+            }
+
+            public Color NextColor()
+            {
+                var ColorName = Color.FromName(proInfos[rand.Next(0, proInfos.Length)].Name);
+
+                return ColorName;
+            }
+        }
+
+        private const string Separator = "-----------------------------------------------------";
+
+        private static void WriteViewportConfiguration(ViewportLayout vp)
+        {
+
+            Trace.WriteLine(Separator);
+
+            Dump(nameof(vp.Renderer), vp.Renderer);
+            Dump(nameof(vp.RendererName), vp.RendererName);
+            Dump(nameof(vp.RendererVendor), vp.RendererVendor);
+            Dump(nameof(vp.RendererVersion), vp.RendererVersion);
+
+            Trace.WriteLine(Separator);
+
+            Dump(nameof(vp.AskForFsaa), vp.AskForFsaa);
+            Dump(nameof(vp.AntiAliasing), vp.AntiAliasing);
+            Dump(nameof(vp.IsFsaaAvailable), vp.IsFsaaAvailable);
+            Dump(nameof(vp.FsaaSamples), vp.FsaaSamples);
+            Dump(nameof(vp.AccurateTransparency), vp.AccurateTransparency);
+            Dump(nameof(vp.UseShaders), vp.UseShaders);
+
+            Trace.WriteLine(Separator);
+
+            Dump(nameof(vp.Rendered.PlanarReflections), vp.Rendered.PlanarReflections);
+            Dump(nameof(vp.Rendered.ShadowMode), vp.Rendered.ShadowMode);
+            Dump(nameof(vp.Rendered.ShowEdges), vp.Rendered.ShowEdges);
+            Dump(nameof(vp.Rendered.ShowInternalWires), vp.Rendered.ShowInternalWires);
+            Dump(nameof(vp.Rendered.RealisticShadowQuality), vp.Rendered.RealisticShadowQuality);
+            Dump(nameof(vp.Rendered.SilhouettesDrawingMode), vp.Rendered.SilhouettesDrawingMode);
+
+
+            Trace.WriteLine(Separator);
+
+        }
+
+        private static void Dump(string propertyName, object propertyValue)
+        {
+            Trace.WriteLine(propertyName.PadRight(35) + " : " + propertyValue.ToString().PadRight(35));
+        }
+    }
+
+
+
+    /// <summary>
+    /// http://www.codeproject.com/Articles/21009/A-Simple-TextBox-TraceListener
+    /// </summary>
+    public class TextBoxTraceListener : TraceListener
+    {
+        private TextBox _target;
+        private StringSendDelegate _invokeWrite;
+
+        public TextBoxTraceListener(TextBox target)
+        {
+            _target = target;
+            _target.TextChanged += traceConsole_TextChanged;
+            _invokeWrite = new StringSendDelegate(SendString);
+        }
+
+        public override void Write(string message)
+        {
+            _target.Invoke(_invokeWrite, new object[] { message });
+        }
+
+        public override void WriteLine(string message)
+        {
+            _target.Invoke(_invokeWrite, new object[]
+                { message + Environment.NewLine });
+        }
+
+        private delegate void StringSendDelegate(string message);
+        private void SendString(string message)
+        {
+            // No need to lock text box as this function will only 
+            // ever be executed from the UI thread
+            _target.Text += message;
+        }
+
+        private void traceConsole_TextChanged(object sender, EventArgs e)
+        {
+            if (_target.Text.Length == 0) return;
+
+            _target.SelectionStart = _target.Text.Length - 1;
+            _target.SelectionLength = 0;
+            _target.ScrollToCaret();
+        }
+    }
+}
