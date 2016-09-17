@@ -22,6 +22,8 @@ or
 [DisplayName("Equal Segment Constrain Active")]
 public bool IsEqualSegmentActive { get; set; }
 ´´´
+
+Take a look at [this](https://github.com/tenacious/Cheetah.ExampleViewer/blob/master/Cheetah.ExampleViewer/Examples/FourLinesWithConstrain.cs) and [this](https://github.com/tenacious/Cheetah.ExampleViewer/blob/master/Cheetah.ExampleViewer/Examples/RoundedRectangle.cs) code files, for reference.
 ____
 
 Here a gif demo :
