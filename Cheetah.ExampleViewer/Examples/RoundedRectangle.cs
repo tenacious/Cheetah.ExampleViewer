@@ -52,8 +52,14 @@ namespace Cheetah.ExampleViewer
         [DisplayName("Tangent Constrain Active")]
         public bool IsTangentActive { get; set; }
 
-        [DisplayName("EqualRadius Constrain Active")]
+        [DisplayName("Equal Radius Constrain Active")]
         public bool IsEqualRadiusActive { get; set; }
+
+        [DisplayName("Arc Radius Value")]
+        public double ArcRadiusValue { get; set; }
+
+        [DisplayName("Equal Segment Constrain Active")]
+        public bool IsEqualSegmentActive { get; set; }
 
         public void Run()
         {
@@ -113,7 +119,6 @@ namespace Cheetah.ExampleViewer
 
             if (IsTangentActive)
             {
-
                 dataSet.AddTangent(arc1, line1);
                 dataSet.AddTangent(arc2, line1);
                 dataSet.AddTangent(arc2, line2);
@@ -124,7 +129,17 @@ namespace Cheetah.ExampleViewer
                 dataSet.AddTangent(arc1, line4);
             }
 
-            //---------
+            if (ArcRadiusValue > 0)
+            {
+                dataSet.AddRadius(arc1, ArcRadiusValue);
+            }
+
+            if (IsEqualSegmentActive)
+            {
+                dataSet.AddEqual(line1, line2);
+                dataSet.AddEqual(line2, line3);
+                dataSet.AddEqual(line3, line4);
+            }
 
             // 2. Creating solver object
             var solver = new SolverCpu11();
@@ -149,18 +164,17 @@ namespace Cheetah.ExampleViewer
 
             if (rslt.Any())
             {
-                //Update Value
-                line1 = (CheetahLine2D)rslt.Single(x => x.Id == line1.Id);
-                line2 = (CheetahLine2D)rslt.Single(x => x.Id == line2.Id);
-                line3 = (CheetahLine2D)rslt.Single(x => x.Id == line3.Id);
-                line4 = (CheetahLine2D)rslt.Single(x => x.Id == line4.Id);
+                Helper.GetUpdated(ref line1, rslt);
+                Helper.GetUpdated(ref line2, rslt);
+                Helper.GetUpdated(ref line3, rslt);
+                Helper.GetUpdated(ref line4, rslt);
 
-                arc1 = (CheetahArc2D)rslt.Single(x => x.Id == arc1.Id);
-                arc2 = (CheetahArc2D)rslt.Single(x => x.Id == arc2.Id);
-                arc3 = (CheetahArc2D)rslt.Single(x => x.Id == arc3.Id);
-                arc4 = (CheetahArc2D)rslt.Single(x => x.Id == arc4.Id);
+                Helper.GetUpdated(ref arc1, rslt);
+                Helper.GetUpdated(ref arc2, rslt);
+                Helper.GetUpdated(ref arc3, rslt);
+                Helper.GetUpdated(ref arc4, rslt);
             }
-        } 
+        }
 
         public List<CheetahCurve> GetCurrentElements()
         {

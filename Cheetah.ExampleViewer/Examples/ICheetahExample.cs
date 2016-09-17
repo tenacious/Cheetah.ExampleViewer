@@ -23,7 +23,7 @@ namespace Cheetah.ExampleViewer
     /// <summary>
     /// 
     /// </summary>
-    public static class CheetahHelper
+    public static class Helper
     {
         /// <summary>
         /// 

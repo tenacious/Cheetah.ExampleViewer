@@ -99,15 +99,10 @@ namespace Cheetah.ExampleViewer
 
             if (rslt.Any())
             {
-                //Update Value
-                //line1 = (CheetahLine2D)rslt.Single(x => x.Id == line1.Id);
-                //line2 = (CheetahLine2D)rslt.Single(x => x.Id == line2.Id);
-                //line3 = (CheetahLine2D)rslt.Single(x => x.Id == line3.Id);
-                //line4 = (CheetahLine2D)rslt.Single(x => x.Id == line4.Id);
-                CheetahHelper.GetUpdated(ref line1, rslt);
-                CheetahHelper.GetUpdated(ref line2, rslt);
-                CheetahHelper.GetUpdated(ref line3, rslt);
-                CheetahHelper.GetUpdated(ref line4, rslt);
+                Helper.GetUpdated(ref line1, rslt);
+                Helper.GetUpdated(ref line2, rslt);
+                Helper.GetUpdated(ref line3, rslt);
+                Helper.GetUpdated(ref line4, rslt);
             }
 
             GC.Collect();
