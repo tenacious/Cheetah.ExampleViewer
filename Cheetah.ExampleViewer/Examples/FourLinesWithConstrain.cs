@@ -48,7 +48,6 @@ namespace Cheetah.ExampleViewer
 
             if (IsCoincidenceActive)
             {
-
                 dataSet.AddCoincidence(line1, IdentifiableValueReferences.LineEnd,
                     line2, IdentifiableValueReferences.LineStart);
 

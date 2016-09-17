@@ -12,7 +12,7 @@ To add more example :
 
 Your new example code class will be available in drop-down list. 
 
-To add parameter to your example , put **Display** attribute to related class property, in this way :
+To add parameter to your example , put **DisplayName** attribute to related class property, in this way :
 
 ´´´
 
