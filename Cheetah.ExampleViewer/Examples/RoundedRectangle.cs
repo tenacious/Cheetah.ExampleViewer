@@ -58,8 +58,14 @@ namespace Cheetah.ExampleViewer
         [DisplayName("Arc Radius Value")]
         public double ArcRadiusValue { get; set; }
 
+        [DisplayName("Line1 Length")]
+        public double Line1LenghtValue { get; set; }
+
         [DisplayName("Equal Segment Constrain Active")]
         public bool IsEqualSegmentActive { get; set; }
+
+        [DisplayName("Is Vertical")]
+        public bool IsVertical { get; set; }
 
         public void Run()
         {
@@ -67,6 +73,7 @@ namespace Cheetah.ExampleViewer
 
             if (IsCoincidenceActive)
             {
+
 
                 dataSet.AddCoincidence(arc1, IdentifiableValueReferences.ArcEnd,
                     line1, IdentifiableValueReferences.LineStart);
@@ -134,6 +141,12 @@ namespace Cheetah.ExampleViewer
                 dataSet.AddRadius(arc1, ArcRadiusValue);
             }
 
+            if (Line1LenghtValue > 0)
+            {
+
+                dataSet.AddDistance(line1, IdentifiableValueReferences.LineStart, line1, IdentifiableValueReferences.LineEnd, Line1LenghtValue, DistanceBuilder.PointDistanceType.Aligned);
+            }
+
             if (IsEqualSegmentActive)
             {
                 dataSet.AddEqual(line1, line2);
@@ -141,8 +154,13 @@ namespace Cheetah.ExampleViewer
                 dataSet.AddEqual(line3, line4);
             }
 
+            if (IsVertical)
+            {
+                dataSet.AddVertical(line2);
+            }
+
             // 2. Creating solver object
-            var solver = new SolverCpu11();
+            var solver = new SolverCpu11(null);
 
             // 3. Creating parametric object and setting tolerance (by default 1E-12)
             var parametric = new CheetahParametricBasic(() => solver, false);

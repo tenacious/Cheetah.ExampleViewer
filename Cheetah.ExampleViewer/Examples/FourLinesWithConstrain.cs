@@ -74,7 +74,7 @@ namespace Cheetah.ExampleViewer
             }
 
             // 4. Creating solver object
-            var solver = new SolverCpu11();
+            var solver = new SolverCpu11(null);
 
             // 5. Creating parametric object and setting tolerance (by default 1E-12)
             var parametric = new CheetahParametricBasic(() => solver, false, true, true);

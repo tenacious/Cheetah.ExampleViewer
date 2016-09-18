@@ -123,6 +123,7 @@ namespace Cheetah.ExampleViewer
             {
                 var cLine = e as CheetahLine2D;
                 var cArc = e as CheetahArc2D;
+                var cCircle = e as CheetahCircle2D;
 
                 if (cLine != null)
                 {
@@ -139,6 +140,14 @@ namespace Cheetah.ExampleViewer
                     foreach (var p in pnts)
                         arc.Points.Add(p);
                     Viewport1.Children.Add(arc);
+                }
+                else if (cCircle != null)
+                {
+                    var circle = new LinesVisual3D { Color = Colors.DarkBlue, Thickness = 3 };
+                    var pnts = GetPoints(new CheetahArc2D(cCircle.Center, 0, Math.PI * 2 , cCircle.Radius));
+                    foreach (var p in pnts)
+                        circle.Points.Add(p);
+                    Viewport1.Children.Add(circle);
                 }
             }
         }
